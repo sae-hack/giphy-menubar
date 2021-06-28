@@ -16,7 +16,21 @@
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
-  // Insert code here to initialize your application
+  NSStoryboard *storyboard = [NSStoryboard storyboardWithName:@"Main" bundle:nil];
+  NSViewController *rootViewController = [storyboard instantiateControllerWithIdentifier:@"root"];
+  
+  _popover = [[NSPopover alloc] init];
+  [_popover setContentSize:NSMakeSize(800, 600)];
+  [_popover setAnimates:YES];
+  [_popover setBehavior:NSPopoverBehaviorTransient];
+  [_popover setContentViewController:rootViewController];
+  
+  _statusBarItem = [[NSStatusBar systemStatusBar] statusItemWithLength:60.];
+  
+  if (_statusBarItem.button != nil) {
+    [_statusBarItem.button setAction:@selector(togglePopover:)];
+    [_statusBarItem.button setTitle:@"GIPHY"];
+  }
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
@@ -27,6 +41,17 @@
 
 - (NSURL *)sourceURLForBridge:(__unused RCTBridge *)bridge {
   return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:@"main"]; // .jsbundle;
+}
+
+- (IBAction)togglePopover:(id)sender {
+  if (_statusBarItem.button != nil) {
+    if (_popover.isShown) {
+      [_popover performClose:sender];
+    } else {
+      [_popover showRelativeToRect:_statusBarItem.button.bounds ofView:_statusBarItem.button preferredEdge:NSRectEdgeMinY];
+      [_popover.contentViewController.view.window becomeKeyWindow];
+    }
+  }
 }
 
 @end
