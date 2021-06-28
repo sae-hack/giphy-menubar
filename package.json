@@ -15,7 +15,7 @@
     "query-string": "^7.0.1",
     "react": "16.13.1",
     "react-native": "0.63.4",
-    "react-native-macos": "^0.63.0-0"
+    "react-native-macos": "https://github.com/microsoft/react-native-macos#415abb553e33e93586e7c74a36f8eddb0266dc6d"
   },
   "devDependencies": {
     "@babel/core": "^7.8.4",
