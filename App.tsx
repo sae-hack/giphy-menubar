@@ -1,74 +1,60 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * Generated with the TypeScript template
- * https://github.com/react-native-community/react-native-template-typescript
- *
- * @format
- */
-
-import React from 'react';
+import {useRequest} from 'ahooks';
+import React, {useEffect, useMemo, useState} from 'react';
 import {
   SafeAreaView,
   StyleSheet,
   ScrollView,
   View,
+  TextInput,
   Text,
-  StatusBar,
 } from 'react-native';
+import * as querystring from 'query-string';
+import debounce from 'debounce';
 
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
 
-declare const global: {HermesInternal: null | {}};
+const GIPHY_KEY = 'lBkWp4xWgwegUbSnnms1bsvPMX0zoT2i'; // some dummy account, ok to include in git
 
-const App = () => {
+const App: React.FC = () => {
+  const [searchText, setSearchText] = useState('');
+
+  const {data, run, loading} = useRequest(
+    (query: string) => ({
+      url: querystring.stringifyUrl({
+        url: 'https://api.giphy.com/v1/gifs/search',
+        query: {q: query, api_key: GIPHY_KEY},
+      }),
+    }),
+    {manual: true},
+  );
+
+  const debouncedSearch = useMemo(() => debounce(run, 200), [run]);
+
+  useEffect(() => {
+    if (searchText) {
+      debouncedSearch(searchText);
+    }
+  }, [debouncedSearch, searchText]);
+
   return (
     <>
-      <StatusBar barStyle="dark-content" />
       <SafeAreaView>
         <ScrollView
           contentInsetAdjustmentBehavior="automatic"
           style={styles.scrollView}>
-          <Header />
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
-            </View>
-          )}
+          <TextInput
+            style={styles.input}
+            onChangeText={setSearchText}
+            value={searchText}
+          />
           <View style={styles.body}>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step One</Text>
-              <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-                screen and then come back to see your edits.
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Debug</Text>
-              <Text style={styles.sectionDescription}>
-                <DebugInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Learn More</Text>
-              <Text style={styles.sectionDescription}>
-                Read the docs to discover what to do next:
-              </Text>
-            </View>
-            <LearnMoreLinks />
+            {loading && <Text style={styles.text}>Loading</Text>}
+
+            <Text style={styles.text}>
+              {searchText && data
+                ? JSON.stringify(data)
+                : 'Please input some query'}
+            </Text>
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -80,38 +66,18 @@ const styles = StyleSheet.create({
   scrollView: {
     backgroundColor: Colors.lighter,
   },
-  engine: {
-    position: 'absolute',
-    right: 0,
-  },
   body: {
     backgroundColor: Colors.white,
-  },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
     color: Colors.black,
   },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    color: Colors.dark,
+  input: {
+    height: 40,
+    margin: 12,
+    borderWidth: 1,
+    color: 'black',
   },
-  highlight: {
-    fontWeight: '700',
-  },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
+  text: {
+    color: Colors.black,
   },
 });
 
