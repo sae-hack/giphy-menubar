@@ -10,6 +10,8 @@ import {Colors} from 'react-native/Libraries/NewAppScreen';
 import ActionMenu from './ActionMenu';
 import {Gif} from './types';
 
+// const loadingImage = require('./loading.gif');
+
 // react-native-macos' TouchableOpacity does not have
 // onMouseEnter in its type definition, converting to any to supress the error.
 const TouchableOpacity = _TouchableOpacity as any;
@@ -53,7 +55,9 @@ const styles = StyleSheet.create({
     left: 0,
     top: 0,
   },
-  image: {},
+  image: {
+    backgroundColor: '#0004',
+  },
 });
 
 export default GifView;
