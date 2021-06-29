@@ -97,6 +97,8 @@ const App: React.FC = () => {
           numColumns={4}
           onScroll={handleScroll}
           scrollEventThrottle={500}
+          removeClippedSubviews
+          windowSize={7}
         />
       </SafeAreaView>
     </>
