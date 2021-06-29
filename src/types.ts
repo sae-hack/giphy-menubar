@@ -15,4 +15,8 @@ export interface Gif {
 
 export interface SearchResult {
   data: Gif[];
+  pagination: {
+    offset: number;
+    count: number;
+  };
 }

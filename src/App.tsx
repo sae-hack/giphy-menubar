@@ -7,6 +7,8 @@ import {
   Text,
   FlatList,
   ListRenderItem,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
 } from 'react-native';
 import * as querystring from 'query-string';
 import debounce from 'debounce';
@@ -19,12 +21,15 @@ const GIPHY_KEY = 'lBkWp4xWgwegUbSnnms1bsvPMX0zoT2i'; // some dummy account, ok 
 
 const App: React.FC = () => {
   const [searchText, setSearchText] = useState('');
+  const [offset, setOffset] = useState(0);
+
+  const [images, setImages] = useState<ReadonlyArray<Gif>>([]);
 
   const {data, run, loading} = useRequest<SearchResult>(
-    (query: string) => ({
+    (query: string, _offset: number) => ({
       url: querystring.stringifyUrl({
         url: 'https://api.giphy.com/v1/gifs/search',
-        query: {q: query, api_key: GIPHY_KEY},
+        query: {q: query, api_key: GIPHY_KEY, offset: _offset},
       }),
     }),
     {manual: true},
@@ -34,13 +39,44 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (searchText) {
-      debouncedSearch(searchText);
+      setImages([]);
+      debouncedSearch(searchText, 0);
     }
   }, [debouncedSearch, searchText]);
+
+  useEffect(() => {
+    if (data?.data) {
+      setImages((_images) => {
+        // avoid duplication by checking the last item
+        if (
+          _images.length > 0 &&
+          data.data.length > 0 &&
+          _images[_images.length - 1].id === data.data[data.data.length - 1].id
+        ) {
+          return _images;
+        }
+        return [..._images, ...data?.data];
+      });
+      setOffset(data.pagination.offset + data.pagination.count);
+    }
+  }, [data]);
 
   const renderItem: ListRenderItem<Gif> = useCallback(
     ({item}) => <GifView gif={item} />,
     [],
+  );
+
+  const handleScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const {layoutMeasurement, contentOffset, contentSize} = event.nativeEvent;
+      if (
+        layoutMeasurement.height + contentOffset.y >=
+        contentSize.height - 20
+      ) {
+        debouncedSearch(searchText, offset);
+      }
+    },
+    [debouncedSearch, offset, searchText],
   );
 
   return (
@@ -51,14 +87,16 @@ const App: React.FC = () => {
           onChangeText={setSearchText}
           value={searchText}
         />
-        {loading && <Text style={styles.text}>Loading</Text>}
+        {loading && <Text style={styles.loading}>loading...</Text>}
 
         <FlatList<Gif>
           style={styles.list}
-          data={data?.data || []}
+          data={images}
           renderItem={renderItem}
           keyExtractor={(item: Gif) => item.id}
           numColumns={4}
+          onScroll={handleScroll}
+          scrollEventThrottle={500}
         />
       </SafeAreaView>
     </>
@@ -77,6 +115,12 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   text: {
+    color: Colors.black,
+  },
+  loading: {
+    position: 'absolute',
+    right: 10,
+    top: 10,
     color: Colors.black,
   },
   list: {},
