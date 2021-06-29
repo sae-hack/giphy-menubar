@@ -1,19 +1,32 @@
 import prettyBytes from 'pretty-bytes';
-import React from 'react';
+import React, {useEffect} from 'react';
 import {StyleSheet, Text, TouchableHighlight, View} from 'react-native';
 import {Gif, GifImage} from './types';
 import Clipboard from '@react-native-clipboard/clipboard';
+import {useToast} from 'react-native-rooster';
 
 const ActionMenuRow: React.FC<{id: string; image: GifImage}> = ({
   id,
   image,
 }) => {
+  const {addToast, setToastConfig} = useToast();
+
+  useEffect(() => {
+    setToastConfig({
+      bgColor: {
+        success: 'black',
+      },
+    });
+  }, [setToastConfig]);
+
   const handleCopyLink = () => {
     Clipboard.setString(image.url);
+    addToast({type: 'success', message: 'GIF URL Copied'});
   };
 
   const handleCopyMd = () => {
     Clipboard.setString(`![${id}](${image.url})`);
+    addToast({type: 'success', message: 'GIF Markdown Copied'});
   };
 
   return (

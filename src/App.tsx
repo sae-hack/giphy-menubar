@@ -17,6 +17,7 @@ import debounce from 'debounce';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import GifView from './GifView';
 import {Gif, SearchResult} from './types';
+import {ToastProvider} from 'react-native-rooster';
 
 const GIPHY_KEY = 'lBkWp4xWgwegUbSnnms1bsvPMX0zoT2i'; // some dummy account, ok to include in git
 
@@ -81,7 +82,7 @@ const App: React.FC = () => {
   );
 
   return (
-    <>
+    <ToastProvider>
       <SafeAreaView style={styles.body}>
         <TextInput
           style={styles.input}
@@ -108,7 +109,7 @@ const App: React.FC = () => {
           </View>
         )}
       </SafeAreaView>
-    </>
+    </ToastProvider>
   );
 };
 
