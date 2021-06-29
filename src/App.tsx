@@ -3,10 +3,8 @@ import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {
   SafeAreaView,
   StyleSheet,
-  View,
   TextInput,
   Text,
-  Image,
   FlatList,
   ListRenderItem,
 } from 'react-native';
@@ -14,43 +12,10 @@ import * as querystring from 'query-string';
 import debounce from 'debounce';
 
 import {Colors} from 'react-native/Libraries/NewAppScreen';
-
-interface GifImage {
-  size: string;
-  url: string;
-}
-
-interface Gif {
-  title: string;
-  id: string;
-  images: {
-    original: GifImage;
-    downsized: GifImage;
-    fixed_height_small: GifImage;
-  };
-}
-
-interface SearchResult {
-  data: Gif[];
-}
+import GifView from './GifView';
+import {Gif, SearchResult} from './types';
 
 const GIPHY_KEY = 'lBkWp4xWgwegUbSnnms1bsvPMX0zoT2i'; // some dummy account, ok to include in git
-
-const GifView: React.FC<{gif: Gif}> = ({gif}) => {
-  return (
-    <View>
-      <Text style={[styles.text, styles.imageText]} numberOfLines={1}>
-        {gif.title || gif.id}
-      </Text>
-      <Image
-        style={styles.image}
-        height={200}
-        width={267}
-        source={{uri: gif.images.fixed_height_small.url}}
-      />
-    </View>
-  );
-};
 
 const App: React.FC = () => {
   const [searchText, setSearchText] = useState('');
@@ -93,7 +58,7 @@ const App: React.FC = () => {
           data={data?.data || []}
           renderItem={renderItem}
           keyExtractor={(item: Gif) => item.id}
-          numColumns={3}
+          numColumns={4}
         />
       </SafeAreaView>
     </>
@@ -107,24 +72,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   input: {
-    height: 40,
-    margin: 12,
+    margin: 8,
     borderWidth: 1,
     color: 'black',
   },
   text: {
     color: Colors.black,
   },
-  imageText: {
-    width: 266,
-  },
-  image: {
-    width: 266,
-    height: 200,
-  },
-  list: {
-    marginLeft: 15,
-  },
+  list: {},
 });
 
 export default App;
