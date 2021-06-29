@@ -1,20 +1,36 @@
 import prettyBytes from 'pretty-bytes';
 import React from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {StyleSheet, Text, TouchableHighlight, View} from 'react-native';
 import {Gif, GifImage} from './types';
 import Clipboard from '@react-native-clipboard/clipboard';
 
-const ActionMenuRow: React.FC<{image: GifImage}> = ({image}) => {
+const ActionMenuRow: React.FC<{id: string; image: GifImage}> = ({
+  id,
+  image,
+}) => {
   const handleCopyLink = () => {
     Clipboard.setString(image.url);
+  };
+
+  const handleCopyMd = () => {
+    Clipboard.setString(`![${id}](${image.url})`);
   };
 
   return (
     <View style={styles.row}>
       <Text>{prettyBytes(parseInt(image.size, 10))}</Text>
-      <TouchableOpacity style={styles.button} onPress={handleCopyLink}>
+      <TouchableHighlight
+        style={styles.button}
+        onPress={handleCopyLink}
+        underlayColor="#0004">
         <Text>🔗</Text>
-      </TouchableOpacity>
+      </TouchableHighlight>
+      <TouchableHighlight
+        style={styles.button}
+        onPress={handleCopyMd}
+        underlayColor="#0004">
+        <Text>md</Text>
+      </TouchableHighlight>
     </View>
   );
 };
@@ -22,9 +38,9 @@ const ActionMenuRow: React.FC<{image: GifImage}> = ({image}) => {
 const ActionMenu: React.FC<{gif: Gif}> = ({gif}) => {
   return (
     <View style={styles.container}>
-      <ActionMenuRow image={gif.images.original} />
+      <ActionMenuRow id={gif.id} image={gif.images.original} />
       {gif.images.original.size !== gif.images.downsized.size && (
-        <ActionMenuRow image={gif.images.downsized} />
+        <ActionMenuRow id={gif.id} image={gif.images.downsized} />
       )}
     </View>
   );
@@ -45,9 +61,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: '#0004',
     padding: 10,
+    alignItems: 'center',
   },
   button: {
-    paddingLeft: 5,
+    marginLeft: 5,
+    padding: 2,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#fff8',
   },
 });
 
