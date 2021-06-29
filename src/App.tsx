@@ -9,6 +9,7 @@ import {
   ListRenderItem,
   NativeSyntheticEvent,
   NativeScrollEvent,
+  View,
 } from 'react-native';
 import * as querystring from 'query-string';
 import debounce from 'debounce';
@@ -38,7 +39,7 @@ const App: React.FC = () => {
   const debouncedSearch = useMemo(() => debounce(run, 200), [run]);
 
   useEffect(() => {
-    if (searchText) {
+    if (searchText.trim()) {
       setImages([]);
       debouncedSearch(searchText, 0);
     }
@@ -89,17 +90,23 @@ const App: React.FC = () => {
         />
         {loading && <Text style={styles.loading}>loading...</Text>}
 
-        <FlatList<Gif>
-          style={styles.list}
-          data={images}
-          renderItem={renderItem}
-          keyExtractor={(item: Gif) => item.id}
-          numColumns={4}
-          onScroll={handleScroll}
-          scrollEventThrottle={500}
-          removeClippedSubviews
-          windowSize={7}
-        />
+        {searchText.trim() ? (
+          <FlatList<Gif>
+            style={styles.list}
+            data={images}
+            renderItem={renderItem}
+            keyExtractor={(item: Gif) => item.id}
+            numColumns={4}
+            onScroll={handleScroll}
+            scrollEventThrottle={500}
+            removeClippedSubviews
+            windowSize={7}
+          />
+        ) : (
+          <View style={styles.typeToSearchTextContainer}>
+            <Text style={styles.typeToSearchText}>Type to search</Text>
+          </View>
+        )}
       </SafeAreaView>
     </>
   );
@@ -124,6 +131,20 @@ const styles = StyleSheet.create({
     right: 10,
     top: 10,
     color: Colors.black,
+  },
+  typeToSearchTextContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  typeToSearchText: {
+    fontSize: 100,
+    fontWeight: '100',
+    color: '#0004',
   },
   list: {},
 });
